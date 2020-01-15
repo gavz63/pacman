@@ -186,12 +186,16 @@ function lookForBubble(x, y, directions, count) {
 function checkAdjacent(x, y, directions) {
     var gameboard_x = GAMEBOARD[x];
     if (directions.includes(1) && GAMEBOARD[x + 1] && !GAMEBOARD[x + 1][y].eaten) { //Right
+        //console.log(GAMEBOARD[x + 1][y]);
         return 1;
     } else if (directions.includes(2) && gameboard_x && !gameboard_x[y + 1].eaten) { //Down
+        //console.log(gameboard_x[y + 1]);
         return 2;
     } else if (directions.includes(3) && GAMEBOARD[x - 1] &&!GAMEBOARD[x - 1][y].eaten) { //Left
+        //console.log(GAMEBOARD[x - 1][y]);
         return 3;
     } else if (directions.includes(4) && gameboard_x && !gameboard_x[y - 1].eaten) { //Up
+        //console.log(gameboard_x[y - 1]);
         return 4;
     }
 }
