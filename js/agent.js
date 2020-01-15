@@ -5,7 +5,7 @@ var getXY = function(x, y) {
     var j = Math.floor((y - BUBBLES_Y_START + 9)/17.75);
 
     return {x: i, y: j}
-}
+};
 
 var buildGameboard = function () {
     GAMEBOARD = [];
@@ -134,26 +134,30 @@ function selectMove() {
 
     if (!PACMAN_DEAD && !GAMEOVER) { // make sure the game is running
 
-        var xy = getXY();
+        var xy = getXY(PACMAN_POSITION_X, PACMAN_POSITION_Y);
         var x = xy.x;
         var y = xy.y;
+
+        console.log("(" + x + ", " + y + ")");
+
         var directions = getDirections(x, y);
-        movePacman(lookForBubble(x, y, directions, 1));
+        movePacman(lookForBubble(x, y, directions, 1).dir);
     }
 }
 
 function getDirections(x, y) {
     var directions = [];
-    if (GAMEBOARD[x + 1][y] != null) { //Right
+    gameboard_x = GAMEBOARD[x];
+    if (GAMEBOARD[x + 1] && GAMEBOARD[x + 1][y]) { //Right
         directions.push(1);
     }
-    if (GAMEBOARD[x][y + 1] != null) { //Down
+    if (gameboard_x && gameboard_x[y + 1]) { //Down
         directions.push(2);
     }
-    if (GAMEBOARD[x - 1][y]) { //Left
+    if (GAMEBOARD[x - 1] && GAMEBOARD[x - 1][y]) { //Left
         directions.push(3);
     }
-    if (GAMEBOARD[x][y-1] != null) { //Up
+    if (gameboard_x && gameboard_x[y - 1]) { //Up
         directions.push(4);
     }
     return directions;
@@ -180,17 +184,14 @@ function lookForBubble(x, y, directions, count) {
 }
 
 function checkAdjacent(x, y, directions) {
-    if (directions.includes(1) && GAMEBOARD[x + 1][y].eaten) { //Right
+    var gameboard_x = GAMEBOARD[x];
+    if (directions.includes(1) && GAMEBOARD[x + 1] && !GAMEBOARD[x + 1][y].eaten) { //Right
         return 1;
-    } else if (directions.includes(2) && GAMEBOARD[x][y + 1].eaten) { //Down
+    } else if (directions.includes(2) && gameboard_x && !gameboard_x[y + 1].eaten) { //Down
         return 2;
-    } else if (directions.includes(3) && GAMEBOARD[x - 1][y].eaten) { //Left
+    } else if (directions.includes(3) && GAMEBOARD[x - 1] &&!GAMEBOARD[x - 1][y].eaten) { //Left
         return 3;
-    } else if (directions.includes(4) && GAMEBOARD[x][y - 1].eaten) { //Up
+    } else if (directions.includes(4) && gameboard_x && !gameboard_x[y - 1].eaten) { //Up
         return 4;
     }
 }
-
-
-
-//setInterval(drawDebug, 1000/3);
