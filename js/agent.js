@@ -135,6 +135,10 @@ function selectMove() {
     if (!PACMAN_DEAD && !GAMEOVER) { // make sure the game is running
         var found = false;
         var xy = getXY(PACMAN_POSITION_X, PACMAN_POSITION_Y);
+        if ((GAMEBOARD[xy.x][xy.y].bubble ||GAMEBOARD[xy.x][xy.y].superBubble)
+            &&!GAMEBOARD[xy.x][xy.y].eaten) {
+            return;
+        }
 
         var visited = [xy];
         var queue = [];
@@ -209,28 +213,26 @@ function selectMove() {
  */
 function getDirections(x, y, visited) {
     var directions = [];
-    if (!visited.includes({x: x + 1, y: y}) &&
-        GAMEBOARD[x + 1] && GAMEBOARD[x + 1][y] &&
-        !GAMEBOARD[x + 1][y].pinky) { //Right
-        directions.push(1);
-    }
-    if (!visited.includes({x: x, y: y + 1}) &&
-        GAMEBOARD[x] && GAMEBOARD[x][y + 1] &&
-        !GAMEBOARD[x][y + 1].pinky){ //Down
-        directions.push(2);
-        visited.push({x: x, y: y + 1});
-    }
     if (!visited.includes({x: x - 1, y: y}) &&
-        GAMEBOARD[x - 1] && GAMEBOARD[x - 1][y] &&
-        !GAMEBOARD[x - 1][y].pinky) { //Left
+        GAMEBOARD[x - 1] && GAMEBOARD[x - 1][y]) { //Left
         directions.push(3);
         visited.push({x: x - 1, y: y});
     }
+    if (!visited.includes({x: x + 1, y: y}) &&
+        GAMEBOARD[x + 1] && GAMEBOARD[x + 1][y]) { //Right
+        directions.push(1);
+    }
     if (!visited.includes({x: x, y: y - 1}) &&
-        GAMEBOARD[x] && GAMEBOARD[x][y - 1] &&
-        !GAMEBOARD[x][y - 1].pinky) { //Up
+        GAMEBOARD[x] && GAMEBOARD[x][y - 1]) { //Up
         directions.push(4);
         visited.push({x: x, y: y - 1});
     }
+    if (!visited.includes({x: x, y: y + 1}) &&
+        GAMEBOARD[x] && GAMEBOARD[x][y + 1]){ //Down
+        directions.push(2);
+        visited.push({x: x, y: y + 1});
+    }
+
+
     return directions;
 }
