@@ -168,18 +168,23 @@ function selectMove() {
         while (!found && queue.length < 2000) {
             var node = queue.shift();
             if (node) {
-                if (((GAMEBOARD[node.x][node.y].bubble || GAMEBOARD[node.x][node.y].superBubble) && !GAMEBOARD[node.x][node.y].eaten) ||
-                    (GAMEBOARD[node.x][node.y].pinky && GHOST_PINKY_AFFRAID_STATE) ||
-                    (GAMEBOARD[node.x][node.y].inky && GHOST_INKY_AFFRAID_STATE) ||
-                    (GAMEBOARD[node.x][node.y].blinky && GHOST_BLINKY_AFFRAID_STATE) ||
-                    (GAMEBOARD[node.x][node.y].clyde && GHOST_CLYDE_AFFRAID_STATE)) {
+                if (((GAMEBOARD[node.x][node.y].bubble || GAMEBOARD[node.x][node.y].superBubble) && !GAMEBOARD[node.x][node.y].eaten) &&
+                    !dangerGhostNearby(node.x, node.y)) {
                     found = true;
                     movePacman(node.dir);
+                    return;
+                } else if (containsDangerGhost(node.x, node.y)) {
+                    //Go the other way
+                    if ((node.dir + 2) % 4 === 0) {
+                        canMovePacman(1) ? movePacman(1) : movePacman(oneDirection());
+                    } else {
+                        canMovePacman((node.dir + 2) % 4) ? movePacman((node.dir + 2) % 4) : movePacman(oneDirection());
+                    }
                     return;
                 } else {
                     directions = getDirections(node.x, node.y, visited);
                     directions.forEach(function (dir) {
-                        if (dir === 1) { //
+                        if (dir === 1) { //Right
                             var newNode = {x: node.x + 1, y: node.y, dir: node.dir};
                             queue.push(newNode);
                             visited.push(newNode);
@@ -199,11 +204,18 @@ function selectMove() {
                     });
                 }
             } else {
-                movePacman(oneDirection());
-                return;
+                if (PACMAN_MOVING) {
+                } else {
+                    movePacman(oneDirection());
+                }
+                return
             }
         }
-        movePacman(oneDirection());
+        if (PACMAN_MOVING) {
+        } else {
+            movePacman(oneDirection());
+        }
+        return;
     }
 }
 
@@ -212,7 +224,7 @@ function selectMove() {
  * @param x, the x coordinate of the cell we are checking
  * @param y, the y coordinate of the cell we are checking
  * @param visited, an array of x, y coordinates that we have already tested.
- * @returns directions, an array of (numbers) directions pacman can move from this coordinate
+ * @returns [] directions, an array of (numbers) directions pacman can move from this coordinate
  */
 function getDirections(x, y, visited) {
     var directions = [];
@@ -237,4 +249,25 @@ function getDirections(x, y, visited) {
     }
 
     return directions;
+}
+
+function containsDangerGhost(x, y) {
+    if (GAMEBOARD[x] && GAMEBOARD[x][y]) {
+        return (GAMEBOARD[x][y].pinky && !GHOST_PINKY_AFFRAID_STATE) ||
+            (GAMEBOARD[x][y].clyde && !GHOST_CLYDE_AFFRAID_STATE) ||
+            (GAMEBOARD[x][y].blinky && !GHOST_BLINKY_AFFRAID_STATE) ||
+            (GAMEBOARD[x][y].inky && !GHOST_INKY_AFFRAID_STATE);
+    }
+    return false;
+}
+
+function dangerGhostNearby(x, y) {
+    for (var i = 0; i < 3; i++) {
+        for (var j = 0; j < 3; j++) {
+            if (containsDangerGhost(x + i, y +j)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
