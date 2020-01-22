@@ -165,7 +165,7 @@ function selectMove() {
         });
 
         //BFS
-        while (!found) {
+        while (!found && queue.length < 2000) {
             var node = queue.shift();
             if (node) {
                 if (((GAMEBOARD[node.x][node.y].bubble || GAMEBOARD[node.x][node.y].superBubble) && !GAMEBOARD[node.x][node.y].eaten) ||
@@ -175,6 +175,7 @@ function selectMove() {
                     (GAMEBOARD[node.x][node.y].clyde && GHOST_CLYDE_AFFRAID_STATE)) {
                     found = true;
                     movePacman(node.dir);
+                    return;
                 } else {
                     directions = getDirections(node.x, node.y, visited);
                     directions.forEach(function (dir) {
@@ -199,8 +200,10 @@ function selectMove() {
                 }
             } else {
                 movePacman(oneDirection());
+                return;
             }
         }
+        movePacman(oneDirection());
     }
 }
 
@@ -232,7 +235,6 @@ function getDirections(x, y, visited) {
         directions.push(2);
         visited.push({x: x, y: y + 1});
     }
-
 
     return directions;
 }
