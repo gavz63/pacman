@@ -140,32 +140,29 @@ function selectMove() {
             return;
         }
 
-        var visited = [xy];
+        GAMEBOARD[xy.x][xy.y].visited = true;
         var queue = [];
-        var directions = getDirections(xy.x, xy.y, visited);
+        var directions = getDirections(xy.x, xy.y);
         //Set up the queue with direction and adjacent cells
         directions.forEach(function (dir) {
             if (dir === 1) { //Right
                 var newNode = {x: xy.x + 1, y: xy.y, dir: dir};
                 queue.push(newNode);
-                visited.push(newNode);
             } else if (dir === 2) { //Down
                 var newNode = {x: xy.x, y: xy.y + 1, dir: dir};
                 queue.push(newNode);
-                visited.push(newNode);
             } else if (dir === 3) { //Left
                 var newNode = {x: xy.x - 1, y: xy.y, dir: dir};
                 queue.push(newNode);
-                visited.push(newNode);
             } else { //Up
                 var newNode = {x: xy.x, y: xy.y - 1, dir: dir};
                 queue.push(newNode);
-                visited.push(newNode);
             }
+            GAMEBOARD[newNode.x][newNode.y].visited = true;
         });
 
         //BFS
-        while (!found && queue.length < 2000) {
+        while (!found) {
             var node = queue.shift();
             if (node) {
                 if (((GAMEBOARD[node.x][node.y].bubble || GAMEBOARD[node.x][node.y].superBubble) && !GAMEBOARD[node.x][node.y].eaten) &&
@@ -173,34 +170,23 @@ function selectMove() {
                     found = true;
                     movePacman(node.dir);
                     return;
-                } else if (containsDangerGhost(node.x, node.y)) {
-                    //Go the other way
-                    if ((node.dir + 2) % 4 === 0) {
-                        canMovePacman(1) ? movePacman(1) : movePacman(oneDirection());
-                    } else {
-                        canMovePacman((node.dir + 2) % 4) ? movePacman((node.dir + 2) % 4) : movePacman(oneDirection());
-                    }
-                    return;
                 } else {
-                    directions = getDirections(node.x, node.y, visited);
+                    directions = getDirections(node.x, node.y);
                     directions.forEach(function (dir) {
                         if (dir === 1) { //Right
                             var newNode = {x: node.x + 1, y: node.y, dir: node.dir};
                             queue.push(newNode);
-                            visited.push(newNode);
                         } else if (dir === 2) { //Down
                             var newNode = {x: node.x, y: node.y + 1, dir: node.dir};
                             queue.push(newNode);
-                            visited.push(newNode);
                         } else if (dir === 3) { //Left
                             var newNode = {x: node.x - 1, y: node.y, dir: node.dir};
                             queue.push(newNode);
-                            visited.push(newNode);
                         } else { //Up
                             var newNode = {x: node.x, y: node.y - 1, dir: node.dir};
                             queue.push(newNode);
-                            visited.push(newNode);
                         }
+                        GAMEBOARD[newNode.x][newNode.y].visited = true;
                     });
                 }
             } else {
@@ -215,7 +201,6 @@ function selectMove() {
         } else {
             movePacman(oneDirection());
         }
-        return;
     }
 }
 
@@ -223,29 +208,25 @@ function selectMove() {
  * Gets directions pacman can move from the given x, y coordinate
  * @param x, the x coordinate of the cell we are checking
  * @param y, the y coordinate of the cell we are checking
- * @param visited, an array of x, y coordinates that we have already tested.
  * @returns [] directions, an array of (numbers) directions pacman can move from this coordinate
  */
-function getDirections(x, y, visited) {
+function getDirections(x, y) {
     var directions = [];
-    if (!visited.includes({x: x - 1, y: y}) &&
-        GAMEBOARD[x - 1] && GAMEBOARD[x - 1][y]) { //Left
+    if (GAMEBOARD[x - 1] && GAMEBOARD[x - 1][y] && !GAMEBOARD[x - 1][y].visited && !containsDangerGhost(x - 1, y)) { //Left
         directions.push(3);
-        visited.push({x: x - 1, y: y});
+        GAMEBOARD[x - 1][y].visited = true;
     }
-    if (!visited.includes({x: x + 1, y: y}) &&
-        GAMEBOARD[x + 1] && GAMEBOARD[x + 1][y]) { //Right
+    if (GAMEBOARD[x + 1] && GAMEBOARD[x + 1][y] && !GAMEBOARD[x + 1][y].visited && !containsDangerGhost(x + 1, y)) { //Right
         directions.push(1);
+        GAMEBOARD[x + 1][y].visited = true;
     }
-    if (!visited.includes({x: x, y: y - 1}) &&
-        GAMEBOARD[x] && GAMEBOARD[x][y - 1]) { //Up
+    if (GAMEBOARD[x] && GAMEBOARD[x][y - 1] && !GAMEBOARD[x][y - 1].visited && !containsDangerGhost(x, y - 1)) { //Up
         directions.push(4);
-        visited.push({x: x, y: y - 1});
+        GAMEBOARD[x][y - 1].visited = true;
     }
-    if (!visited.includes({x: x, y: y + 1}) &&
-        GAMEBOARD[x] && GAMEBOARD[x][y + 1]){ //Down
+    if (GAMEBOARD[x] && GAMEBOARD[x][y + 1] && !GAMEBOARD[x][y + 1].visited && !containsDangerGhost(x, y + 1)){ //Down
         directions.push(2);
-        visited.push({x: x, y: y + 1});
+        GAMEBOARD[x][y + 1].visited = true;
     }
 
     return directions;
@@ -262,8 +243,8 @@ function containsDangerGhost(x, y) {
 }
 
 function dangerGhostNearby(x, y) {
-    for (var i = 0; i < 3; i++) {
-        for (var j = 0; j < 3; j++) {
+    for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
             if (containsDangerGhost(x + i, y +j)) {
                 return true;
             }
